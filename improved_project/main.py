@@ -6,7 +6,7 @@ from src.analytics import extract_insights, generate_visualizations
 
 def main():
     parser = argparse.ArgumentParser(description="Survey Project Pipeline Orchestrator")
-    parser.add_argument("--samples", type=int, default=5000, help="Number of dummy samples to generate")
+    parser.add_argument("--samples", type=int, default=100000, help="Number of dummy samples to generate")
     parser.add_argument("--output-dir", type=str, default="data", help="Directory to save generated CSV files")
     parser.add_argument("--charts-dir", type=str, default="output", help="Directory to save generated visualizations")
     

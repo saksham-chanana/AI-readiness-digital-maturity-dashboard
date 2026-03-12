@@ -440,7 +440,7 @@ def generate_visualizations(df, msme_df, siloed_businesses, desire_to_invest, ma
     print("Visualizations successfully saved to /Users/sakshamchanana/Desktop/survey/")
 
 if __name__ == "__main__":
-    df = generate_dummy_data(5000)
+    df = generate_dummy_data(100000)
     df = process_data(df)
     
     print("\nSample Processed Data:")
