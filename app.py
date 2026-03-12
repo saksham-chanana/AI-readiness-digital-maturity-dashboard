@@ -8,7 +8,6 @@ import numpy as np
 st.set_page_config(page_title="Digital Maturity & AI Readiness Assessment", layout="wide", page_icon="📊")
 
 # Load data function
-@st.cache_data
 def load_data():
     try:
         # Assumes data exists in the current working directory

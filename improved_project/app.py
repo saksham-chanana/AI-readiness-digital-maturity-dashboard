@@ -27,7 +27,6 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-@st.cache_data
 def load_data():
     file_path = "data/processed_responses.csv"
     if os.path.exists(file_path):
