@@ -173,30 +173,32 @@ elif view == "Analytics Dashboard":
     )
 
     # Basic Data Pre-processing for Charts (same logic as old app.py)
-    if 'AI_Score' not in df.columns and 'Q15_AI_Usage' in df.columns:
-        df['AI_Score'] = pd.to_numeric(df['Q15_AI_Usage'].map({
-            'No, we do not currently use AI': 0,
-            'We are exploring or learning about AI': 1,
-            'We use AI in a few specific or pilot use cases': 2,
-            'AI is central to our core decision-making': 3,
-            'Yes, AI is actively used across multiple business functions': 4
-        }).fillna(0))
+    # Ensure columns exist, are mapped correctly to numbers, and cast to float
+    
+    if 'Q15_AI_Usage' in df.columns:
+        df['AI_Score'] = df['Q15_AI_Usage'].map({
+            'No, we do not currently use AI': 0.0,
+            'We are exploring or learning about AI': 1.0,
+            'We use AI in a few specific or pilot use cases': 2.0,
+            'AI is central to our core decision-making': 3.0,
+            'Yes, AI is actively used across multiple business functions': 4.0
+        }).fillna(0.0)
         
-    if 'CRM_Score' not in df.columns and 'Q2_Communication' in df.columns:
-        df['CRM_Score'] = pd.to_numeric(df['Q2_Communication'].map({
-            'Manually (Phone calls/In-person)': 0,
-            'Messaging Tools (SMS/Email/WhatsApp/Social Media)': 1,
-            'Basic Customer Software (Standard or Custom made)': 2,
-            'Advanced Digital Software / CRM Software': 3
-        }).fillna(0))
+    if 'Q2_Communication' in df.columns:
+        df['CRM_Score'] = df['Q2_Communication'].map({
+            'Manually (Phone calls/In-person)': 0.0,
+            'Messaging Tools (SMS/Email/WhatsApp/Social Media)': 1.0,
+            'Basic Customer Software (Standard or Custom made)': 2.0,
+            'Advanced Digital Software / CRM Software': 3.0
+        }).fillna(0.0)
         
-    if 'Cloud_Score' not in df.columns and 'Q6.2_Cloud_Deployment' in df.columns:
-        df['Cloud_Score'] = pd.to_numeric(df['Q6.2_Cloud_Deployment'].map({
-            'On Premises Software Systems': 0,
-            'Partly On-Premises /Cloud Based': 1,
-            'Fully managed by software vendors/service providers': 2,
-            'Cloud based Software systems': 3
-        }).fillna(0))
+    if 'Q6.2_Cloud_Deployment' in df.columns:
+        df['Cloud_Score'] = df['Q6.2_Cloud_Deployment'].map({
+            'On Premises Software Systems': 0.0,
+            'Partly On-Premises /Cloud Based': 1.0,
+            'Fully managed by software vendors/service providers': 2.0,
+            'Cloud based Software systems': 3.0
+        }).fillna(0.0)
 
     # Ensure Persona and Industry exist for filtering
     if 'Persona' not in df.columns:
@@ -252,17 +254,29 @@ elif view == "Analytics Dashboard":
 
     with row1_col2:
         st.subheader("2. Correlation Matrix")
-        corr_cols = ['CRM_Score', 'Cloud_Score', 'AI_Score', 'Maturity_Score']
-        # Filter to only columns that exist
-        corr_cols = [c for c in corr_cols if c in filtered_df.columns]
+        # Ensure we only use numeric columns that exist in the dataframe
+        possible_cols = ['CRM_Score', 'Cloud_Score', 'AI_Score', 'Maturity_Score']
+        corr_cols = [c for c in possible_cols if c in filtered_df.columns and pd.api.types.is_numeric_dtype(filtered_df[c])]
+        
         if len(corr_cols) > 1:
+            # Calculate correlation matrix
             corr_matrix = filtered_df[corr_cols].corr()
-            fig_corr = px.imshow(corr_matrix, text_auto=".2f", aspect="auto", 
-                                 color_continuous_scale='RdBu_r', zmin=-1, zmax=1,
-                                 title="AI Readiness vs Adv. CRM/Cloud")
+            
+            # Create a heatmap using graph_objects for maximum reliability
+            fig_corr = go.Figure(data=go.Heatmap(
+                z=corr_matrix.values,
+                x=corr_matrix.columns,
+                y=corr_matrix.columns,
+                colorscale='RdBu_r',
+                zmin=-1, zmax=1,
+                text=corr_matrix.values.round(2),
+                texttemplate="%{text}",
+                showscale=True
+            ))
+            fig_corr.update_layout(title="AI Readiness vs Adv. CRM/Cloud")
             st.plotly_chart(fig_corr, use_container_width=True)
         else:
-            st.write("Insufficient data columns for Correlation Matrix.")
+            st.write("Insufficient numeric data columns for Correlation Matrix.")
 
     st.divider()
 
@@ -307,7 +321,7 @@ elif view == "Analytics Dashboard":
                 barrier_counts = non_ai_users.groupby(['AI_Barrier', 'Persona']).size().reset_index(name='Count')
                 fig_barriers = px.bar(barrier_counts, x='AI_Barrier', y='Count', color='Persona', 
                                       barmode='group', title="Cited Barriers (Non-Advanced Users)",
-                                      text='Count')
+                                      text_auto=True)
                 fig_barriers.update_traces(textposition='outside')
                 fig_barriers.update_layout(xaxis_title="Cited Barrier", yaxis_title="Number of Businesses")
                 st.plotly_chart(fig_barriers, use_container_width=True)
