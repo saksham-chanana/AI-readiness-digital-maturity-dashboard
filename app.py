@@ -174,29 +174,29 @@ elif view == "Analytics Dashboard":
 
     # Basic Data Pre-processing for Charts (same logic as old app.py)
     if 'AI_Score' not in df.columns and 'Q15_AI_Usage' in df.columns:
-        df['AI_Score'] = df['Q15_AI_Usage'].map({
+        df['AI_Score'] = pd.to_numeric(df['Q15_AI_Usage'].map({
             'No, we do not currently use AI': 0,
             'We are exploring or learning about AI': 1,
             'We use AI in a few specific or pilot use cases': 2,
             'AI is central to our core decision-making': 3,
             'Yes, AI is actively used across multiple business functions': 4
-        }).fillna(0)
+        }).fillna(0))
         
     if 'CRM_Score' not in df.columns and 'Q2_Communication' in df.columns:
-        df['CRM_Score'] = df['Q2_Communication'].map({
+        df['CRM_Score'] = pd.to_numeric(df['Q2_Communication'].map({
             'Manually (Phone calls/In-person)': 0,
             'Messaging Tools (SMS/Email/WhatsApp/Social Media)': 1,
             'Basic Customer Software (Standard or Custom made)': 2,
             'Advanced Digital Software / CRM Software': 3
-        }).fillna(0)
+        }).fillna(0))
         
     if 'Cloud_Score' not in df.columns and 'Q6.2_Cloud_Deployment' in df.columns:
-        df['Cloud_Score'] = df['Q6.2_Cloud_Deployment'].map({
+        df['Cloud_Score'] = pd.to_numeric(df['Q6.2_Cloud_Deployment'].map({
             'On Premises Software Systems': 0,
             'Partly On-Premises /Cloud Based': 1,
             'Fully managed by software vendors/service providers': 2,
             'Cloud based Software systems': 3
-        }).fillna(0)
+        }).fillna(0))
 
     # Ensure Persona and Industry exist for filtering
     if 'Persona' not in df.columns:
@@ -306,7 +306,9 @@ elif view == "Analytics Dashboard":
                 
                 barrier_counts = non_ai_users.groupby(['AI_Barrier', 'Persona']).size().reset_index(name='Count')
                 fig_barriers = px.bar(barrier_counts, x='AI_Barrier', y='Count', color='Persona', 
-                                      barmode='group', title="Cited Barriers (Non-Advanced Users)")
+                                      barmode='group', title="Cited Barriers (Non-Advanced Users)",
+                                      text='Count')
+                fig_barriers.update_traces(textposition='outside')
                 fig_barriers.update_layout(xaxis_title="Cited Barrier", yaxis_title="Number of Businesses")
                 st.plotly_chart(fig_barriers, use_container_width=True)
             else:
