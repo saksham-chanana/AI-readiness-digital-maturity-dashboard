@@ -5,44 +5,113 @@ import plotly.express as px
 import os
 import io
 import random
+from streamlit_option_menu import option_menu
 from src.processor import calculate_maturity, categorize_maturity, process_data
 
-st.set_page_config(page_title="Digital Maturity Dashboard", layout="wide", page_icon="📊")
+st.set_page_config(page_title="Digital Maturity Dashboard", layout="wide", page_icon="📊", initial_sidebar_state="collapsed")
 
 # Custom CSS for styling
 st.markdown("""
 <style>
+    /* Hide Streamlit components for a cleaner UI */
+    #MainMenu {visibility: hidden;}
+    footer {visibility: hidden;}
+    header {visibility: hidden;}
+
     .reportview-container {
-        background: #f0f2f6
+        background: #f4f6f9;
+        font-family: 'Inter', sans-serif;
     }
     .big-font {
-        font-size:30px !important;
-        font-weight: bold;
+        font-size: 30px !important;
+        font-weight: 600;
+        color: #1a202c;
     }
     .metric-card {
         background-color: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        padding: 24px;
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
         text-align: center;
-        margin-bottom: 20px;
+        margin-bottom: 24px;
+        border: 1px solid #e2e8f0;
+        transition: transform 0.2s ease-in-out;
+    }
+    .metric-card:hover {
+        transform: translateY(-5px);
     }
     .score-card {
-        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
         color: white;
-        padding: 30px;
-        border-radius: 15px;
+        padding: 40px 30px;
+        border-radius: 20px;
         text-align: center;
-        margin-top: 20px;
-        box-shadow: 0 10px 15px rgba(0,0,0,0.2);
+        margin-top: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
+    .score-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
+        transform: rotate(30deg);
+        pointer-events: none;
+    }
+    h1, h2, h3 {
+        color: #1e293b;
+        font-weight: 700;
+    }
+    .stButton>button {
+        width: 100%;
+        border-radius: 8px;
+        font-weight: 600;
+        padding: 10px 24px;
+        background-color: #1e3c72;
+        color: #ffffff;
+        border: none;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    .stButton>button:hover {
+        background-color: #2a5298;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+    }
+    /* Smooth out spacing */
+    div[data-testid="stMetricValue"] {
+        font-size: 36px;
+        font-weight: 700;
+    }
+    /* Expander styling for file upload */
+    .streamlit-expanderHeader {
+        font-weight: 600;
+        color: #1e3c72;
     }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------- NAVIGATION ----------------
-st.sidebar.title("Navigation")
-view = st.sidebar.radio("Select View:", ["Take Assessment", "Analytics Dashboard"])
-st.sidebar.divider()
+selected = option_menu(
+    menu_title=None,
+    options=["Take Assessment", "Analytics Dashboard"],
+    icons=["clipboard2-data-fill", "bar-chart-fill"],
+    menu_icon="cast",
+    default_index=0,
+    orientation="horizontal",
+    styles={
+        "container": {"padding": "0!important", "background-color": "#ffffff", "border-radius": "10px", "box-shadow": "0 4px 6px rgba(0, 0, 0, 0.05)", "margin-bottom": "20px", "border": "1px solid #e2e8f0"},
+        "icon": {"color": "#4ade80", "font-size": "20px"},
+        "nav-link": {"font-size": "16px", "text-align": "center", "margin": "0px", "--hover-color": "#f0f2f6", "font-weight": "600"},
+        "nav-link-selected": {"background-color": "#1e3c72", "color": "white", "border-radius": "8px"},
+    }
+)
+view = selected
 
 # ---------------- VIEW 1: TAKE ASSESSMENT ----------------
 if view == "Take Assessment":
@@ -134,14 +203,14 @@ elif view == "Analytics Dashboard":
     st.markdown("Visualizing the assessment results across businesses.")
     
     # File Uploader Section
-    st.sidebar.subheader("Data Source")
-    uploaded_file = st.sidebar.file_uploader("Upload Raw Survey Data (.csv)", type=["csv"])
+    with st.expander("🛠 Data Management (Upload Custom CSV to Sandbox)", expanded=False):
+        uploaded_file = st.file_uploader("Override the Demo Dashboard with your own raw Survey Data (.csv)", type=["csv"])
     
     # Load Data Logic
     if uploaded_file is not None:
         try:
             raw_df = pd.read_csv(uploaded_file)
-            st.sidebar.success("File uploaded successfully! Processing real-time...")
+            st.success("File uploaded successfully! Processing real-time...")
             if 'Maturity_Score' not in raw_df.columns:
                 df = process_data(raw_df)
             else:
