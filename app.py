@@ -10,7 +10,7 @@ from src.processor import calculate_maturity, categorize_maturity, process_data
 
 st.set_page_config(page_title="Digital Maturity Dashboard", layout="wide", page_icon="📊", initial_sidebar_state="collapsed")
 
-# Custom CSS for Bento-grid styling
+# Custom CSS for Unreal Engine 5 Glassmorphism UI
 st.markdown("""
 <style>
     /* Hide Streamlit components */
@@ -18,80 +18,101 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    /* Core Application Background */
+    /* Core Application Background - Deep Cinematic Environment */
     .stApp, .reportview-container {
-        background-color: #0b1021 !important; /* Midnight Blue base */
+        background-color: #03040a !important; /* Almost pure black, slight blue tint */
+        background-image: 
+            radial-gradient(circle at 0% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
+            radial-gradient(circle at 100% 100%, rgba(192, 132, 252, 0.15) 0%, transparent 40%);
         color: #f8fafc;
-        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-family: 'SF Pro Display', -apple-system, sans-serif;
     }
     
     /* Typography */
     h1, h2, h3, h4, h5, h6, .big-font, p, span, label, div {
         color: #f1f5f9;
-        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        font-family: 'SF Pro Display', -apple-system, sans-serif;
     }
     h1 {
         font-weight: 800;
         letter-spacing: -0.05em;
+        text-shadow: 0 4px 20px rgba(56, 189, 248, 0.3);
     }
     
-    /* Sleek Bento-grid Cards */
+    /* Glassmorphic Floating Cards */
     div[data-testid="stMetric"], .metric-card {
-        background: #151e32 !important; /* Slightly lighter Midnight Blue */
-        border: 1px solid rgba(255, 255, 255, 0.05) !important;
-        border-radius: 24px; /* Soft rounded corners */
+        background: rgba(15, 20, 35, 0.4) !important;
+        backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        border-top: 1px solid rgba(255, 255, 255, 0.2) !important;
+        border-left: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-right: 1px solid rgba(0, 0, 0, 0.5) !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.8) !important;
+        border-radius: 24px; 
         box-shadow: 
-            0 20px 40px -10px rgba(0, 0, 0, 0.4), /* Outer shadow */
-            inset 0 1px 2px rgba(255, 255, 255, 0.1); /* Subtle inner glow */
-        padding: 32px; /* Generous white space */
+            0 30px 60px -15px rgba(0, 0, 0, 0.8), /* Deep volumetric shadow */
+            0 0 30px rgba(56, 189, 248, 0.05), /* Ambient lighting */
+            inset 0 1px 0 rgba(255, 255, 255, 0.1); /* Refractive inner edge */
+        padding: 32px;
         text-align: left;
-        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
     div[data-testid="stMetric"]:hover, .metric-card:hover {
-        transform: translateY(-4px);
+        transform: translateY(-8px) scale(1.02);
         box-shadow: 
-            0 30px 50px -15px rgba(0, 0, 0, 0.5),
-            inset 0 1px 3px rgba(204, 255, 0, 0.2); /* Electric Lime inner glow on hover */
-        border: 1px solid rgba(204, 255, 0, 0.3) !important;
+            0 40px 80px -20px rgba(0, 0, 0, 0.9),
+            0 0 40px rgba(192, 132, 252, 0.15),
+            inset 0 1px 2px rgba(255, 255, 255, 0.2);
+        border-top: 1px solid rgba(255, 255, 255, 0.3) !important;
     }
     
-    /* Specific styling for the primary Scorecard to stand out */
+    /* Centerpiece Scorecard - Unreal Engine Glow */
     .score-card {
-        background: linear-gradient(135deg, #151e32 0%, #1a2540 100%);
+        background: linear-gradient(135deg, rgba(20, 30, 60, 0.6) 0%, rgba(10, 15, 30, 0.8) 100%);
+        backdrop-filter: blur(40px);
+        -webkit-backdrop-filter: blur(40px);
+        border-top: 1px solid rgba(255, 255, 255, 0.3);
+        border-left: 1px solid rgba(255, 255, 255, 0.1);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.9);
+        border-right: 1px solid rgba(0, 0, 0, 0.7);
         color: white;
-        padding: 48px 40px;
+        padding: 56px 40px;
         border-radius: 32px;
         text-align: center;
         margin: 40px 0;
         box-shadow: 
-            0 20px 40px -10px rgba(0, 0, 0, 0.5),
-            inset 0 2px 5px rgba(255, 255, 255, 0.1),
-            0 0 0 1px rgba(204, 255, 0, 0.2); /* Subtle Electric Lime ring */
+            0 50px 100px -20px rgba(0, 0, 0, 1), /* Massive drop shadow */
+            0 0 80px rgba(56, 189, 248, 0.15), /* Glowing aurora behind card */
+            inset 0 2px 20px rgba(255, 255, 255, 0.05);
         position: relative;
         overflow: hidden;
     }
     .score-card h2, .score-card h1, .score-card h3 {
         color: #ffffff !important;
     }
-    /* Simple gradient text for the main score */
     .score-card h1 {
-        font-size: 84px !important;
-        background: -webkit-linear-gradient(45deg, #ccff00, #38bdf8);
+        font-size: 96px !important;
+        background: -webkit-linear-gradient(45deg, #38bdf8, #c084fc);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         margin: 10px 0;
+        filter: drop-shadow(0 0 20px rgba(56, 189, 248, 0.4)); /* Text neon glow */
     }
 
     /* Form and Inputs */
     .stSelectbox>div>div, .stTextInput>div>div, .stRadio>div {
-        background-color: #1a2540 !important;
+        background-color: rgba(15, 20, 35, 0.6) !important;
+        backdrop-filter: blur(10px);
         color: #f8fafc !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.5) !important;
         border-radius: 12px;
+        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
     }
     div[data-baseweb="select"] {
-        background-color: #1a2540 !important;
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        background-color: rgba(15, 20, 35, 0.6) !important;
+        border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.5) !important;
         border-radius: 12px;
     }
     
@@ -99,31 +120,39 @@ st.markdown("""
     .stButton>button {
         width: 100%;
         border-radius: 16px;
-        font-weight: 600;
+        font-weight: 700;
         font-size: 16px;
         padding: 16px 24px;
-        background-color: #ccff00; /* Electric Lime */
-        color: #0b1021 !important; /* Midnight Blue text for contrast */
-        border: none;
-        box-shadow: 0 4px 14px 0 rgba(204, 255, 0, 0.39);
-        transition: all 0.2s ease;
+        background: linear-gradient(135deg, #38bdf8 0%, #c084fc 100%);
+        color: #ffffff !important;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 
+            0 10px 30px -5px rgba(192, 132, 252, 0.5),
+            inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        transition: all 0.3s ease;
     }
     .stButton>button:hover {
-        background-color: #d4ff33;
-        box-shadow: 0 6px 20px rgba(204, 255, 0, 0.5);
-        transform: translateY(-2px);
+        background: linear-gradient(135deg, #7dd3fc 0%, #d8b4fe 100%);
+        box-shadow: 
+            0 15px 40px -5px rgba(192, 132, 252, 0.7),
+            inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        transform: translateY(-3px);
     }
     
     div[data-testid="stMetricValue"] {
-        font-size: 42px;
-        font-weight: 700;
+        font-size: 48px;
+        font-weight: 800;
         letter-spacing: -0.02em;
-        color: #f8fafc;
+        background: -webkit-linear-gradient(45deg, #f8fafc, #94a3b8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
     }
     div[data-testid="stMetricLabel"] {
         color: #94a3b8 !important;
-        font-weight: 500;
-        font-size: 15px;
+        font-weight: 600;
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 1px;
         margin-bottom: 8px;
     }
 </style>
@@ -138,10 +167,10 @@ selected = option_menu(
     default_index=0,
     orientation="horizontal",
     styles={
-        "container": {"padding": "8px!important", "background-color": "#151e32", "border-radius": "20px", "box-shadow": "inset 0 1px 2px rgba(255,255,255,0.05)", "margin-bottom": "30px", "border": "1px solid rgba(255,255,255,0.05)"},
+        "container": {"padding": "8px!important", "background-color": "rgba(15, 20, 35, 0.4)", "backdrop-filter": "blur(24px)", "border-radius": "24px", "box-shadow": "0 20px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.1)", "margin-bottom": "30px", "border-top": "1px solid rgba(255,255,255,0.1)", "border-bottom": "1px solid rgba(0,0,0,0.5)"},
         "icon": {"color": "#94a3b8", "font-size": "20px"},
-        "nav-link": {"color": "#94a3b8", "font-size": "15px", "text-align": "center", "margin": "0 4px", "--hover-color": "#1a2540", "font-weight": "500", "border-radius": "12px", "padding": "12px 16px"},
-        "nav-link-selected": {"background-color": "#ccff00", "color": "#0b1021", "font-weight": "600"},
+        "nav-link": {"color": "#94a3b8", "font-size": "15px", "text-align": "center", "margin": "0 4px", "--hover-color": "rgba(255,255,255,0.05)", "font-weight": "500", "border-radius": "16px", "padding": "12px 16px"},
+        "nav-link-selected": {"background": "linear-gradient(135deg, #38bdf8 0%, #c084fc 100%)", "color": "#ffffff", "font-weight": "600", "box-shadow": "inset 0 1px 0 rgba(255,255,255,0.4)"},
     }
 )
 view = selected
@@ -345,14 +374,15 @@ elif view == "Analytics Dashboard":
         persona_counts = filtered_df['Persona'].value_counts().reset_index()
         persona_counts.columns = ['Persona', 'Count']
         fig_pie = px.pie(persona_counts, values='Count', names='Persona', 
-                         title='Distribution of Respondent Personas', hole=0.6,
-                         color_discrete_sequence=['#ccff00', '#38bdf8', '#c084fc', '#f472b6', '#f8fafc'])
+                         title='Distribution of Respondent Personas', hole=0.85,
+                         color_discrete_sequence=['#38bdf8', '#c084fc', '#f472b6', '#818cf8', '#e2e8f0'])
         fig_pie.update_traces(textinfo='percent', 
-                              marker=dict(line=dict(color='#151e32', width=3)),
+                              marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)),
                               hoverinfo='label+percent+value')
         fig_pie.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', 
                               font=dict(family="SF Pro Display, sans-serif", color='#f8fafc'),
-                              showlegend=False)
+                              showlegend=False,
+                              annotations=[dict(text='Personas', x=0.5, y=0.5, font_size=24, showarrow=False, font=dict(color='#94a3b8'))])
         st.plotly_chart(fig_pie, use_container_width=True)
 
     with row1_col2:
@@ -366,7 +396,7 @@ elif view == "Analytics Dashboard":
             corr_matrix = filtered_df[corr_cols].corr()
             
             fig_corr = px.imshow(corr_matrix, text_auto=".2f", aspect="auto", 
-                                 color_continuous_scale=['#0b1021', '#1e293b', '#ccff00'], zmin=-1, zmax=1,
+                                 color_continuous_scale=['#c084fc', '#03040a', '#38bdf8'], zmin=-1, zmax=1,
                                  title="AI Readiness vs Adv. CRM/Cloud")
             fig_corr.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="SF Pro Display, sans-serif", color='#f8fafc'))
             st.plotly_chart(fig_corr, use_container_width=True)
@@ -390,7 +420,8 @@ elif view == "Analytics Dashboard":
                 y=['Total Manufacturing', 'Collects Historical Data', 'Automated Core Ops', 'Uses Predictive AI'],
                 x=[m_total, collect_data, automated, predictive_ai],
                 textinfo="value+percent initial",
-                marker={"color": ["#f8fafc", "#f472b6", "#c084fc", "#ccff00"]}
+                marker={"color": ["#f8fafc", "#818cf8", "#c084fc", "#38bdf8"],
+                        "line": {"width": [0, 0, 0, 0], "color": ["rgba(0,0,0,0)"] * 4}}
             ))
             fig_funnel.update_layout(title="Data Collection to Predictive Analytics", template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="SF Pro Display, sans-serif", color='#f8fafc'))
             st.plotly_chart(fig_funnel, use_container_width=True)
@@ -419,7 +450,7 @@ elif view == "Analytics Dashboard":
                 barrier_counts = non_ai_users.groupby(['AI_Barrier', 'Persona']).size().reset_index(name='Count')
                 fig_barriers = px.bar(barrier_counts, x='AI_Barrier', y='Count', color='Persona', 
                                       barmode='group', title="Cited Barriers (Non-Advanced Users)",
-                                      text_auto='.0f', color_discrete_sequence=['#ccff00', '#38bdf8', '#c084fc', '#f472b6'])
+                                      text_auto='.0f', color_discrete_sequence=['#38bdf8', '#c084fc', '#f472b6', '#818cf8'])
                 fig_barriers.update_layout(xaxis_title="Cited Barrier", yaxis_title="Number of Businesses", template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="SF Pro Display, sans-serif", color='#f8fafc'), bargap=0.2)
                 st.plotly_chart(fig_barriers, use_container_width=True)
             else:
