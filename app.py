@@ -252,7 +252,7 @@ elif view == "Analytics Dashboard":
         st.subheader("2. Correlation Matrix")
         # Ensure we only use numeric columns that exist in the dataframe
         possible_cols = ['CRM_Score', 'Cloud_Score', 'AI_Score', 'Maturity_Score']
-        corr_cols = [c for c in possible_cols if c in filtered_df.columns and pd.api.types.is_numeric_dtype(filtered_df[c])]
+        corr_cols = [c for c in possible_cols if c in filtered_df.columns]
         
         if len(corr_cols) > 1:
             # Calculate correlation matrix
@@ -311,8 +311,7 @@ elif view == "Analytics Dashboard":
                 barrier_counts = non_ai_users.groupby(['AI_Barrier', 'Persona']).size().reset_index(name='Count')
                 fig_barriers = px.bar(barrier_counts, x='AI_Barrier', y='Count', color='Persona', 
                                       barmode='group', title="Cited Barriers (Non-Advanced Users)",
-                                      text_auto=True)
-                fig_barriers.update_traces(textposition='outside')
+                                      text_auto='.0f')
                 fig_barriers.update_layout(xaxis_title="Cited Barrier", yaxis_title="Number of Businesses")
                 st.plotly_chart(fig_barriers, use_container_width=True)
             else:
