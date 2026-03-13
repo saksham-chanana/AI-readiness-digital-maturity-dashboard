@@ -5,172 +5,44 @@ import plotly.express as px
 import os
 import io
 import random
-from streamlit_option_menu import option_menu
 from src.processor import calculate_maturity, categorize_maturity, process_data
 
-st.set_page_config(page_title="Digital Maturity Dashboard", layout="wide", page_icon="📊", initial_sidebar_state="collapsed")
+st.set_page_config(page_title="Digital Maturity Dashboard", layout="wide", page_icon="📊")
 
-# Custom CSS for Unreal Engine 5 Glassmorphism UI
+# Custom CSS for styling
 st.markdown("""
 <style>
-    /* Hide Streamlit components */
-    #MainMenu {visibility: hidden;}
-    footer {visibility: hidden;}
-    header {visibility: hidden;}
-
-    /* Core Application Background - Deep Cinematic Environment */
-    .stApp, .reportview-container {
-        background-color: #0b1115 !important;
-        background-image: 
-            radial-gradient(circle at 10% 10%, rgba(181, 255, 0, 0.05) 0%, transparent 40%),
-            radial-gradient(circle at 90% 90%, rgba(0, 229, 255, 0.08) 0%, transparent 40%);
-        color: #f8fafc;
-        font-family: 'SF Pro Display', 'Inter', sans-serif;
+    .reportview-container {
+        background: #f0f2f6
     }
-    
-    /* Sleek Bento-grid Cards / Glassmorphic Floating Cards */
-    div[data-testid="stMetric"], .metric-card {
-        background: rgba(30, 35, 45, 0.2) !important;
-        backdrop-filter: blur(32px);
-        -webkit-backdrop-filter: blur(32px);
-        border: 1px solid rgba(255, 255, 255, 0.08) !important;
-        border-radius: 20px; 
-        box-shadow: 
-            0 30px 60px -15px rgba(0, 0, 0, 0.9), /* Deep volumetric shadow */
-            inset 0 1px 1px rgba(255, 255, 255, 0.2), /* Top refractive edge */
-            inset 0 -1px 1px rgba(0, 0, 0, 0.5); /* Bottom dark edge */
-        padding: 30px;
-        text-align: left;
-        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1);
+    .big-font {
+        font-size:30px !important;
+        font-weight: bold;
     }
-    div[data-testid="stMetric"]:hover, .metric-card:hover {
-        transform: translateY(-4px);
-        border: 1px solid rgba(181, 255, 0, 0.3) !important;
-        box-shadow: 
-            0 40px 80px -20px rgba(0, 0, 0, 1),
-            inset 0 1px 1px rgba(181, 255, 0, 0.4),
-            inset 0 0 20px rgba(181, 255, 0, 0.05); /* Soft neon green inner glow */
-    }
-    
-    /* Centerpiece Scorecard */
-    .score-card {
-        background: rgba(30, 35, 45, 0.2);
-        backdrop-filter: blur(40px);
-        -webkit-backdrop-filter: blur(40px);
-        border-radius: 28px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        padding: 48px 40px;
+    .metric-card {
+        background-color: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         text-align: center;
-        margin: 40px 0;
-        box-shadow: 
-            0 50px 100px -20px rgba(0, 0, 0, 1), 
-            inset 0 1px 2px rgba(255, 255, 255, 0.3),
-            inset 0 -1px 2px rgba(0, 0, 0, 0.6);
-        position: relative;
-        overflow: hidden;
-    }
-    .score-card::after {
-        content: '';
-        position: absolute;
-        top: 0; left: 0; right: 0; bottom: 0;
-        background: radial-gradient(circle at 50% 0%, rgba(181, 255, 0, 0.1) 0%, transparent 70%);
-        pointer-events: none;
-    }
-    .score-card h2, .score-card h1, .score-card h3 {
-        color: #ffffff !important;
-        position: relative;
-        z-index: 1;
-    }
-    .score-card h1 {
-        font-size: 88px !important;
-        background: -webkit-linear-gradient(45deg, #b5ff00, #4ade80);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin: 10px 0;
-        filter: drop-shadow(0 0 25px rgba(181, 255, 0, 0.3)); /* Text neon glow */
-    }
-
-    /* Subheaders mapping to the images (e.g., ACTIVITY, SLEEP STAGES) */
-    h3, .st-emotion-cache-10trblm h2, div[data-testid="stMarkdownContainer"] h3 {
-        color: #94a3b8 !important; /* Muted text for headers */
-        font-weight: 600;
-        font-size: 14px !important;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
         margin-bottom: 20px;
     }
-    
-    /* Form and Inputs */
-    .stSelectbox>div>div, .stTextInput>div>div, .stRadio>div {
-        background-color: rgba(20, 25, 30, 0.5) !important;
-        backdrop-filter: blur(10px);
-        color: #f8fafc !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 12px;
-        box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
-    }
-    div[data-baseweb="select"] {
-        background-color: rgba(20, 25, 30, 0.5) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 12px;
-    }
-    
-    /* Buttons */
-    .stButton>button {
-        width: 100%;
-        border-radius: 12px;
-        font-weight: 700;
-        font-size: 15px;
-        padding: 14px 24px;
-        background: linear-gradient(135deg, #b5ff00 0%, #22c55e 100%);
-        color: #0b1115 !important;
-        border: none;
-        box-shadow: 
-            0 8px 25px -5px rgba(181, 255, 0, 0.4),
-            inset 0 1px 1px rgba(255, 255, 255, 0.4);
-        transition: all 0.3s ease;
-    }
-    .stButton>button:hover {
-        background: linear-gradient(135deg, #ccff33 0%, #4ade80 100%);
-        box-shadow: 
-            0 12px 30px -5px rgba(181, 255, 0, 0.6),
-            inset 0 1px 1px rgba(255, 255, 255, 0.6);
-        transform: translateY(-2px);
-    }
-    
-    div[data-testid="stMetricValue"] {
-        font-size: 42px;
-        font-weight: 800;
-        letter-spacing: -0.02em;
-        color: #ffffff;
-    }
-    div[data-testid="stMetricLabel"] {
-        color: #94a3b8 !important;
-        font-weight: 600;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-bottom: 8px;
+    .score-card {
+        background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 15px;
+        text-align: center;
+        margin-top: 20px;
+        box-shadow: 0 10px 15px rgba(0,0,0,0.2);
     }
 </style>
 """, unsafe_allow_html=True)
 
 # ---------------- NAVIGATION ----------------
-selected = option_menu(
-    menu_title=None,
-    options=["Take Assessment", "Analytics Dashboard"],
-    icons=["clipboard2-data-fill", "bar-chart-fill"],
-    menu_icon="cast",
-    default_index=0,
-    orientation="horizontal",
-    styles={
-        "container": {"padding": "8px!important", "background-color": "rgba(30, 35, 45, 0.2)", "backdrop-filter": "blur(32px)", "border-radius": "24px", "box-shadow": "0 20px 40px rgba(0,0,0,0.6), inset 0 1px 1px rgba(255,255,255,0.2), inset 0 -1px 1px rgba(0,0,0,0.5)", "margin-bottom": "30px"},
-        "icon": {"color": "#94a3b8", "font-size": "20px"},
-        "nav-link": {"color": "#94a3b8", "font-size": "15px", "text-align": "center", "margin": "0 4px", "--hover-color": "rgba(255,255,255,0.05)", "font-weight": "500", "border-radius": "16px", "padding": "12px 16px"},
-        "nav-link-selected": {"background": "linear-gradient(135deg, #b5ff00 0%, #22c55e 100%)", "color": "#0b1115", "font-weight": "700", "box-shadow": "inset 0 1px 1px rgba(255,255,255,0.6)"},
-    }
-)
-view = selected
+st.sidebar.title("Navigation")
+view = st.sidebar.radio("Select View:", ["Take Assessment", "Analytics Dashboard"])
+st.sidebar.divider()
 
 # ---------------- VIEW 1: TAKE ASSESSMENT ----------------
 if view == "Take Assessment":
@@ -262,14 +134,14 @@ elif view == "Analytics Dashboard":
     st.markdown("Visualizing the assessment results across businesses.")
     
     # File Uploader Section
-    with st.expander("🛠 Data Management (Upload Custom CSV to Sandbox)", expanded=False):
-        uploaded_file = st.file_uploader("Override the Demo Dashboard with your own raw Survey Data (.csv)", type=["csv"])
+    st.sidebar.subheader("Data Source")
+    uploaded_file = st.sidebar.file_uploader("Upload Raw Survey Data (.csv)", type=["csv"])
     
     # Load Data Logic
     if uploaded_file is not None:
         try:
             raw_df = pd.read_csv(uploaded_file)
-            st.success("File uploaded successfully! Processing real-time...")
+            st.sidebar.success("File uploaded successfully! Processing real-time...")
             if 'Maturity_Score' not in raw_df.columns:
                 df = process_data(raw_df)
             else:
@@ -371,15 +243,9 @@ elif view == "Analytics Dashboard":
         persona_counts = filtered_df['Persona'].value_counts().reset_index()
         persona_counts.columns = ['Persona', 'Count']
         fig_pie = px.pie(persona_counts, values='Count', names='Persona', 
-                         title='DISTRIBUTION', hole=0.85,
-                         color_discrete_sequence=['#b5ff00', '#00e5ff', '#d500f9', '#2979ff', '#f8fafc'])
-        fig_pie.update_traces(textinfo='percent', 
-                              marker=dict(line=dict(color='rgba(0,0,0,0)', width=0)),
-                              hoverinfo='label+percent+value')
-        fig_pie.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', 
-                              font=dict(family="SF Pro Display, sans-serif", color='#f8fafc'),
-                              showlegend=False,
-                              annotations=[dict(text='100%', x=0.5, y=0.5, font_size=32, showarrow=False, font=dict(color='#ffffff'))])
+                         title='Distribution of Respondent Personas', hole=0.4,
+                         color_discrete_sequence=px.colors.qualitative.Pastel)
+        fig_pie.update_traces(textinfo='value+percent')
         st.plotly_chart(fig_pie, use_container_width=True)
 
     with row1_col2:
@@ -393,9 +259,8 @@ elif view == "Analytics Dashboard":
             corr_matrix = filtered_df[corr_cols].corr()
             
             fig_corr = px.imshow(corr_matrix, text_auto=".2f", aspect="auto", 
-                                 color_continuous_scale=['#0b1115', '#2979ff', '#d500f9', '#b5ff00'], zmin=-1, zmax=1,
-                                 title="AI READINESS VS CRM/CLOUD")
-            fig_corr.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="SF Pro Display, sans-serif", color='#f8fafc'))
+                                 color_continuous_scale='RdBu_r', zmin=-1, zmax=1,
+                                 title="AI Readiness vs Adv. CRM/Cloud")
             st.plotly_chart(fig_corr, use_container_width=True)
         else:
             st.write("Insufficient numeric data columns for Correlation Matrix.")
@@ -417,10 +282,9 @@ elif view == "Analytics Dashboard":
                 y=['Total Manufacturing', 'Collects Historical Data', 'Automated Core Ops', 'Uses Predictive AI'],
                 x=[m_total, collect_data, automated, predictive_ai],
                 textinfo="value+percent initial",
-                marker={"color": ["#f8fafc", "#d500f9", "#00e5ff", "#b5ff00"],
-                        "line": {"width": [0, 0, 0, 0], "color": ["rgba(0,0,0,0)"] * 4}}
+                marker={"color": ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]}
             ))
-            fig_funnel.update_layout(title="DATA COLLECTION PIPELINE", template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="SF Pro Display, sans-serif", color='#f8fafc'))
+            fig_funnel.update_layout(title="Data Collection to Predictive Analytics")
             st.plotly_chart(fig_funnel, use_container_width=True)
         else:
             st.write("Manufacturing data not available for funnel.")
@@ -446,9 +310,9 @@ elif view == "Analytics Dashboard":
                 
                 barrier_counts = non_ai_users.groupby(['AI_Barrier', 'Persona']).size().reset_index(name='Count')
                 fig_barriers = px.bar(barrier_counts, x='AI_Barrier', y='Count', color='Persona', 
-                                      barmode='group', title="CITED ADOPTION BARRIERS",
-                                      text_auto='.0f', color_discrete_sequence=['#b5ff00', '#00e5ff', '#d500f9', '#2979ff'])
-                fig_barriers.update_layout(xaxis_title="Barrier", yaxis_title="Businesses", template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="SF Pro Display, sans-serif", color='#f8fafc'), bargap=0.2)
+                                      barmode='group', title="Cited Barriers (Non-Advanced Users)",
+                                      text_auto='.0f')
+                fig_barriers.update_layout(xaxis_title="Cited Barrier", yaxis_title="Number of Businesses")
                 st.plotly_chart(fig_barriers, use_container_width=True)
             else:
                 st.write("No non-AI users found to display barriers.")
