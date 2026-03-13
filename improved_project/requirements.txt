@@ -1,7 +1,0 @@
-pandas
-numpy
-faker
-matplotlib
-seaborn
-plotly
-streamlit
