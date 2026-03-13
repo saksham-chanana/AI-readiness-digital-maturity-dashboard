@@ -10,88 +10,121 @@ from src.processor import calculate_maturity, categorize_maturity, process_data
 
 st.set_page_config(page_title="Digital Maturity Dashboard", layout="wide", page_icon="📊", initial_sidebar_state="collapsed")
 
-# Custom CSS for styling
+# Custom CSS for Bento-grid styling
 st.markdown("""
 <style>
-    /* Hide Streamlit components for a cleaner UI */
+    /* Hide Streamlit components */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
 
-    .reportview-container {
-        background: #f4f6f9;
-        font-family: 'Inter', sans-serif;
+    /* Core Application Background */
+    .stApp, .reportview-container {
+        background-color: #0b1021 !important; /* Midnight Blue base */
+        color: #f8fafc;
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
-    .big-font {
-        font-size: 30px !important;
-        font-weight: 600;
-        color: #1a202c;
+    
+    /* Typography */
+    h1, h2, h3, h4, h5, h6, .big-font, p, span, label, div {
+        color: #f1f5f9;
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
     }
-    .metric-card {
-        background-color: white;
-        padding: 24px;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
-        text-align: center;
-        margin-bottom: 24px;
-        border: 1px solid #e2e8f0;
-        transition: transform 0.2s ease-in-out;
+    h1 {
+        font-weight: 800;
+        letter-spacing: -0.05em;
     }
-    .metric-card:hover {
-        transform: translateY(-5px);
+    
+    /* Sleek Bento-grid Cards */
+    div[data-testid="stMetric"], .metric-card {
+        background: #151e32 !important; /* Slightly lighter Midnight Blue */
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border-radius: 24px; /* Soft rounded corners */
+        box-shadow: 
+            0 20px 40px -10px rgba(0, 0, 0, 0.4), /* Outer shadow */
+            inset 0 1px 2px rgba(255, 255, 255, 0.1); /* Subtle inner glow */
+        padding: 32px; /* Generous white space */
+        text-align: left;
+        transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), box-shadow 0.3s ease;
     }
+    div[data-testid="stMetric"]:hover, .metric-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 
+            0 30px 50px -15px rgba(0, 0, 0, 0.5),
+            inset 0 1px 3px rgba(204, 255, 0, 0.2); /* Electric Lime inner glow on hover */
+        border: 1px solid rgba(204, 255, 0, 0.3) !important;
+    }
+    
+    /* Specific styling for the primary Scorecard to stand out */
     .score-card {
-        background: linear-gradient(135deg, #0f2027 0%, #203a43 50%, #2c5364 100%);
+        background: linear-gradient(135deg, #151e32 0%, #1a2540 100%);
         color: white;
-        padding: 40px 30px;
-        border-radius: 20px;
+        padding: 48px 40px;
+        border-radius: 32px;
         text-align: center;
-        margin-top: 30px;
-        margin-bottom: 30px;
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1);
+        margin: 40px 0;
+        box-shadow: 
+            0 20px 40px -10px rgba(0, 0, 0, 0.5),
+            inset 0 2px 5px rgba(255, 255, 255, 0.1),
+            0 0 0 1px rgba(204, 255, 0, 0.2); /* Subtle Electric Lime ring */
         position: relative;
         overflow: hidden;
     }
-    .score-card::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 70%);
-        transform: rotate(30deg);
-        pointer-events: none;
+    .score-card h2, .score-card h1, .score-card h3 {
+        color: #ffffff !important;
     }
-    h1, h2, h3 {
-        color: #1e293b;
-        font-weight: 700;
+    /* Simple gradient text for the main score */
+    .score-card h1 {
+        font-size: 84px !important;
+        background: -webkit-linear-gradient(45deg, #ccff00, #38bdf8);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        margin: 10px 0;
     }
+
+    /* Form and Inputs */
+    .stSelectbox>div>div, .stTextInput>div>div, .stRadio>div {
+        background-color: #1a2540 !important;
+        color: #f8fafc !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 12px;
+    }
+    div[data-baseweb="select"] {
+        background-color: #1a2540 !important;
+        border: 1px solid rgba(255, 255, 255, 0.08) !important;
+        border-radius: 12px;
+    }
+    
+    /* Buttons */
     .stButton>button {
         width: 100%;
-        border-radius: 8px;
+        border-radius: 16px;
         font-weight: 600;
-        padding: 10px 24px;
-        background-color: #1e3c72;
-        color: #ffffff;
+        font-size: 16px;
+        padding: 16px 24px;
+        background-color: #ccff00; /* Electric Lime */
+        color: #0b1021 !important; /* Midnight Blue text for contrast */
         border: none;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        transition: all 0.3s ease;
+        box-shadow: 0 4px 14px 0 rgba(204, 255, 0, 0.39);
+        transition: all 0.2s ease;
     }
     .stButton>button:hover {
-        background-color: #2a5298;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        background-color: #d4ff33;
+        box-shadow: 0 6px 20px rgba(204, 255, 0, 0.5);
         transform: translateY(-2px);
     }
-    /* Smooth out spacing */
+    
     div[data-testid="stMetricValue"] {
-        font-size: 36px;
+        font-size: 42px;
         font-weight: 700;
+        letter-spacing: -0.02em;
+        color: #f8fafc;
     }
-    /* Expander styling for file upload */
-    .streamlit-expanderHeader {
-        font-weight: 600;
-        color: #1e3c72;
+    div[data-testid="stMetricLabel"] {
+        color: #94a3b8 !important;
+        font-weight: 500;
+        font-size: 15px;
+        margin-bottom: 8px;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -105,10 +138,10 @@ selected = option_menu(
     default_index=0,
     orientation="horizontal",
     styles={
-        "container": {"padding": "0!important", "background-color": "rgba(15,15,30,0.8)", "border-radius": "16px", "box-shadow": "0 0 30px rgba(138,43,226,0.2)", "margin-bottom": "20px", "border": "1px solid rgba(0,255,255,0.3)"},
-        "icon": {"color": "#00ffff", "font-size": "20px"},
-        "nav-link": {"color": "#e0e0e0", "font-size": "16px", "text-align": "center", "margin": "0px", "--hover-color": "rgba(138,43,226,0.4)", "font-weight": "600"},
-        "nav-link-selected": {"background": "linear-gradient(90deg, #8a2be2, #00ffff)", "color": "white", "border-radius": "12px"},
+        "container": {"padding": "8px!important", "background-color": "#151e32", "border-radius": "20px", "box-shadow": "inset 0 1px 2px rgba(255,255,255,0.05)", "margin-bottom": "30px", "border": "1px solid rgba(255,255,255,0.05)"},
+        "icon": {"color": "#94a3b8", "font-size": "20px"},
+        "nav-link": {"color": "#94a3b8", "font-size": "15px", "text-align": "center", "margin": "0 4px", "--hover-color": "#1a2540", "font-weight": "500", "border-radius": "12px", "padding": "12px 16px"},
+        "nav-link-selected": {"background-color": "#ccff00", "color": "#0b1021", "font-weight": "600"},
     }
 )
 view = selected
@@ -312,10 +345,14 @@ elif view == "Analytics Dashboard":
         persona_counts = filtered_df['Persona'].value_counts().reset_index()
         persona_counts.columns = ['Persona', 'Count']
         fig_pie = px.pie(persona_counts, values='Count', names='Persona', 
-                         title='Distribution of Respondent Personas', hole=0.4,
-                         color_discrete_sequence=['#00ffff', '#8a2be2', '#ff00ff', '#1e90ff', '#ff1493'])
-        fig_pie.update_traces(textinfo='value+percent', marker=dict(line=dict(color='#050510', width=2)))
-        fig_pie.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#e0e0e0'))
+                         title='Distribution of Respondent Personas', hole=0.6,
+                         color_discrete_sequence=['#ccff00', '#38bdf8', '#c084fc', '#f472b6', '#f8fafc'])
+        fig_pie.update_traces(textinfo='percent', 
+                              marker=dict(line=dict(color='#151e32', width=3)),
+                              hoverinfo='label+percent+value')
+        fig_pie.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', 
+                              font=dict(family="SF Pro Display, sans-serif", color='#f8fafc'),
+                              showlegend=False)
         st.plotly_chart(fig_pie, use_container_width=True)
 
     with row1_col2:
@@ -329,9 +366,9 @@ elif view == "Analytics Dashboard":
             corr_matrix = filtered_df[corr_cols].corr()
             
             fig_corr = px.imshow(corr_matrix, text_auto=".2f", aspect="auto", 
-                                 color_continuous_scale=['#8a2be2', '#050510', '#00ffff'], zmin=-1, zmax=1,
+                                 color_continuous_scale=['#0b1021', '#1e293b', '#ccff00'], zmin=-1, zmax=1,
                                  title="AI Readiness vs Adv. CRM/Cloud")
-            fig_corr.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#e0e0e0'))
+            fig_corr.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="SF Pro Display, sans-serif", color='#f8fafc'))
             st.plotly_chart(fig_corr, use_container_width=True)
         else:
             st.write("Insufficient numeric data columns for Correlation Matrix.")
@@ -353,9 +390,9 @@ elif view == "Analytics Dashboard":
                 y=['Total Manufacturing', 'Collects Historical Data', 'Automated Core Ops', 'Uses Predictive AI'],
                 x=[m_total, collect_data, automated, predictive_ai],
                 textinfo="value+percent initial",
-                marker={"color": ["#8a2be2", "#ff00ff", "#1e90ff", "#00ffff"]}
+                marker={"color": ["#f8fafc", "#f472b6", "#c084fc", "#ccff00"]}
             ))
-            fig_funnel.update_layout(title="Data Collection to Predictive Analytics", template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#e0e0e0'))
+            fig_funnel.update_layout(title="Data Collection to Predictive Analytics", template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="SF Pro Display, sans-serif", color='#f8fafc'))
             st.plotly_chart(fig_funnel, use_container_width=True)
         else:
             st.write("Manufacturing data not available for funnel.")
@@ -382,8 +419,8 @@ elif view == "Analytics Dashboard":
                 barrier_counts = non_ai_users.groupby(['AI_Barrier', 'Persona']).size().reset_index(name='Count')
                 fig_barriers = px.bar(barrier_counts, x='AI_Barrier', y='Count', color='Persona', 
                                       barmode='group', title="Cited Barriers (Non-Advanced Users)",
-                                      text_auto='.0f', color_discrete_sequence=['#00ffff', '#8a2be2', '#ff00ff', '#1e90ff'])
-                fig_barriers.update_layout(xaxis_title="Cited Barrier", yaxis_title="Number of Businesses", template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#e0e0e0'))
+                                      text_auto='.0f', color_discrete_sequence=['#ccff00', '#38bdf8', '#c084fc', '#f472b6'])
+                fig_barriers.update_layout(xaxis_title="Cited Barrier", yaxis_title="Number of Businesses", template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(family="SF Pro Display, sans-serif", color='#f8fafc'), bargap=0.2)
                 st.plotly_chart(fig_barriers, use_container_width=True)
             else:
                 st.write("No non-AI users found to display barriers.")
