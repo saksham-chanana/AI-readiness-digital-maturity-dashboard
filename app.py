@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 import plotly.express as px
 import os
 import io
-from src.analytics import extract_insights
+import random
 from src.processor import calculate_maturity, categorize_maturity, process_data
 
 st.set_page_config(page_title="Digital Maturity Dashboard", layout="wide", page_icon="📊")
@@ -47,30 +47,37 @@ st.sidebar.divider()
 # ---------------- VIEW 1: TAKE ASSESSMENT ----------------
 if view == "Take Assessment":
     st.title("📝 Company Digital Readiness Assessment")
-    st.markdown("Fill out the form below to instantly generate a personalized digital maturity scorecard for your organization.")
+    st.markdown("Fill out the full survey below to instantly generate a personalized digital maturity scorecard.")
     
     with st.form("assessment_form"):
-        st.subheader("1. Core Operations & Cloud")
-        q6 = st.radio("How are your internal operations managed?", 
-                      ["Manually", "Digitally (using Software/Tools)"])
-        q6_2 = st.selectbox("How is your software deployed?", 
-                            ["N/A", "On Premises Software Systems", "Partly On-Premises /Cloud Based", "Cloud based Software systems", "Fully managed by software vendors/service providers"])
-        q6_3 = st.selectbox("Are your systems integrated?", 
-                            ["Not integrated", "Partially integrated", "Fully integrated"])
+        st.subheader("1. Customer Discovery & Communication")
+        q1 = st.selectbox("How do you find your customers?", ["Manual / Partially Digital", "Online Retail Marketplaces", "Digital Trade Platforms", "Quick Commerce Platforms", "Government Portals"])
+        q2 = st.selectbox("How do you communicate with customers?", ["Manually (Phone calls/In-person)", "Messaging Tools (SMS/Email/WhatsApp/Social Media)", "Basic Customer Software (Standard or Custom made)", "Advanced Digital Software / CRM Software"])
+        q3 = st.selectbox("How do you manage feedback/complaints?", ["No formal recording (Verbal only)", "Recorded manually in a diary or register", "Recorded in Excel/Spreadsheets", "Managed through a digital ticketing system or CRM"])
+        q4 = st.selectbox("How do you track repeat customers?", ["We do not track repeat customers digitally", "We track repeat customers manually using basic digital tools", "We track repeat customers through advanced digital tools"])
+        q5 = st.selectbox("How do you track customer drop-offs?", ["We do not track customer drop-offs", "We track customer drop-offs informally or manually", "We track customer drop-offs using basic/advanced digital tools"])
+        
+        st.subheader("2. Core Operations & Cloud")
+        q6 = st.radio("How are your internal operations managed?", ["Manually", "Digitally (using Software/Tools)"])
+        q6_2 = st.selectbox("How is your software deployed?", ["N/A", "On Premises Software Systems", "Partly On-Premises /Cloud Based", "Cloud based Software systems", "Fully managed by software vendors/service providers"])
+        q6_3 = st.selectbox("Are your systems integrated?", ["Not integrated", "Partially integrated", "Fully integrated"])
                             
-        st.subheader("2. Data Management & Security")
-        q7 = st.selectbox("How do you manage documents?", 
-                          ["Physical files", "Digital files on local devices", "Cloud Storage", "Document management system (DMS)"])
+        st.subheader("3. Data Management & Security")
+        q7 = st.selectbox("How do you manage documents?", ["Physical files", "Digital files on local devices", "Cloud Storage", "Document management system (DMS)"])
+        q8 = st.selectbox("How often is data backed up?", ["Never", "Occasionally (Only When Someone Remembers)", "Regularly (Weekly or Monthly)", "Automatically (Daily or Real-time)"])
         q10 = st.radio("Is your data consistent across all departments?", ["Yes", "No"])
-        q13 = st.selectbox("How do you ensure data quality?",
-                           ["No defined process for data accuracy", "Basic checks done manually", "Regular reviews or validations", "Automated checks", "Data quality is continuously monitored"])
-        q14 = st.selectbox("What is your data security posture?",
-                           ["Minimal / ad-hoc", "Basic security measures in place", "Defined security policies and controls", "Advanced security with regular assessments"])
+        q13 = st.selectbox("How do you ensure data quality?", ["No defined process for data accuracy", "Basic checks done manually", "Regular reviews or validations", "Automated checks", "Data quality is continuously monitored"])
+        q14 = st.selectbox("What is your data security posture?", ["Minimal / ad-hoc", "Basic security measures in place", "Defined security policies and controls", "Advanced security with regular assessments"])
                            
-        st.subheader("3. AI & Advanced Analytics")
+        st.subheader("4. Industry Specific & AI")
+        ind = st.selectbox("What is your Industry?", ["Retail", "Services", "Manufacturing", "IT", "Finance"])
+        q11 = st.selectbox("Are manufacturing operations automated? (Mfg Only)", ["Not Applicable", "No", "Yes"])
+        q12 = st.selectbox("Are machines integrated digitally? (Mfg Only)", ["Not Applicable", "No", "Yes"])
         q9 = st.radio("Do you collect structured historical data?", ["Yes", "No"])
-        q15 = st.selectbox("What is your current AI adoption level?",
-                           ["No, we do not currently use AI", "We are exploring or learning about AI", "We use AI in a few specific or pilot use cases", "AI is central to our core decision-making", "Yes, AI is actively used across multiple business functions"])
+        
+        q15 = st.selectbox("What is your current AI adoption level?", ["No, we do not currently use AI", "We are exploring or learning about AI", "We use AI in a few specific or pilot use cases", "AI is central to our core decision-making", "Yes, AI is actively used across multiple business functions"])
+        q16 = st.selectbox("Do you have AI training guidelines?", ["No guidelines", "Informal guidance", "Documented policies", "SOPs Training and awareness programs"])
+        q17 = st.selectbox("Do you have an AI adoption roadmap?", ["No roadmap", "Informal plans", "Defined roadmap", "Actively executing roadmap"])
         q18 = st.radio("Are you planning to invest in AI in the next 12 months?", ["Yes", "Maybe", "No"])
         
         submitted = st.form_submit_button("Generate Scorecard")
@@ -78,15 +85,26 @@ if view == "Take Assessment":
     if submitted:
         # Build the mock row dictionary
         form_data = {
+            "Q1_Customer_Discovery": q1,
+            "Q2_Communication": q2,
+            "Q3_Feedback": q3,
+            "Q4_Repeat_Customers": q4,
+            "Q5_Drop_offs": q5,
             "Q6_Internal_Operations": q6,
             "Q6.2_Cloud_Deployment": q6_2,
             "Q6.3_Integration": q6_3,
             "Q7_Document_Management": q7,
+            "Q8_Backup_Frequency": q8,
             "Q10_Data_Consistency": q10,
             "Q13_Data_Quality": q13,
             "Q14_Data_Security": q14,
+            "Industry": ind,
+            "Q11_Manufacturing_Automated": q11,
+            "Q12_Machines_Integrated": q12,
             "Q9_Historical_Data": q9,
             "Q15_AI_Usage": q15,
+            "Q16_AI_Training": q16,
+            "Q17_AI_Roadmap": q17,
             "Q18_AI_Investment": q18
         }
         
@@ -112,8 +130,8 @@ if view == "Take Assessment":
 
 # ---------------- VIEW 2: ANALYTICS DASHBOARD ----------------
 elif view == "Analytics Dashboard":
-    st.title("📊 Enterprise Analytics Dashboard")
-    st.markdown("Macro-level insights across businesses. Upload your own dataset or explore the demo.")
+    st.title("📊 Digital Maturity & AI Readiness Dashboard")
+    st.markdown("Visualizing the assessment results across businesses.")
     
     # File Uploader Section
     st.sidebar.subheader("Data Source")
@@ -124,8 +142,10 @@ elif view == "Analytics Dashboard":
         try:
             raw_df = pd.read_csv(uploaded_file)
             st.sidebar.success("File uploaded successfully! Processing real-time...")
-            # Process the raw uploaded data using the engine
-            df = process_data(raw_df)
+            if 'Maturity_Score' not in raw_df.columns:
+                df = process_data(raw_df)
+            else:
+                df = raw_df
             data_mode = "Custom Upload"
         except Exception as e:
             st.error(f"Error processing uploaded file: {e}")
@@ -152,6 +172,38 @@ elif view == "Analytics Dashboard":
         mime="text/csv",
     )
 
+    # Basic Data Pre-processing for Charts (same logic as old app.py)
+    if 'AI_Score' not in df.columns and 'Q15_AI_Usage' in df.columns:
+        df['AI_Score'] = df['Q15_AI_Usage'].map({
+            'No, we do not currently use AI': 0,
+            'We are exploring or learning about AI': 1,
+            'We use AI in a few specific or pilot use cases': 2,
+            'AI is central to our core decision-making': 3,
+            'Yes, AI is actively used across multiple business functions': 4
+        }).fillna(0)
+        
+    if 'CRM_Score' not in df.columns and 'Q2_Communication' in df.columns:
+        df['CRM_Score'] = df['Q2_Communication'].map({
+            'Manually (Phone calls/In-person)': 0,
+            'Messaging Tools (SMS/Email/WhatsApp/Social Media)': 1,
+            'Basic Customer Software (Standard or Custom made)': 2,
+            'Advanced Digital Software / CRM Software': 3
+        }).fillna(0)
+        
+    if 'Cloud_Score' not in df.columns and 'Q6.2_Cloud_Deployment' in df.columns:
+        df['Cloud_Score'] = df['Q6.2_Cloud_Deployment'].map({
+            'On Premises Software Systems': 0,
+            'Partly On-Premises /Cloud Based': 1,
+            'Fully managed by software vendors/service providers': 2,
+            'Cloud based Software systems': 3
+        }).fillna(0)
+
+    # Ensure Persona and Industry exist for filtering
+    if 'Persona' not in df.columns:
+        df['Persona'] = 'Unknown'
+    if 'Industry' not in df.columns:
+        df['Industry'] = 'Unknown'
+
     # Sidebar Filters
     st.sidebar.header("Data Filters")
     selected_industry = st.sidebar.multiselect("Select Industry", options=df['Industry'].unique(), default=df['Industry'].unique())
@@ -162,71 +214,109 @@ elif view == "Analytics Dashboard":
     if filtered_df.empty:
         st.warning("No data matches the selected filters.")
         st.stop()
-    
-    # Extract dynamic insights
-    try:
-        insights_tuple = extract_insights(filtered_df)
-        insights = insights_tuple[0]
-    except Exception as e:
-        st.error(f"Error extracting insights, check data format: {e}")
-        st.stop()
         
+    # Variables for Executive Summary
+    siloed_businesses = filtered_df[
+        (filtered_df.get('Q6_Internal_Operations') == 'Digitally (using Software/Tools)') & 
+        (filtered_df.get('Q6.3_Integration').isin(['Not integrated', 'Partially integrated']))
+    ]
+    desire_to_invest = filtered_df[filtered_df.get('Q18_AI_Investment') == 'Yes']
+    
     # --- Top Level Metrics ---
+    st.header("Executive Summary")
     col1, col2, col3, col4 = st.columns(4)
     with col1:
-        st.markdown(f'<div class="metric-card"><h3>Total Businesses</h3><p class="big-font">{filtered_df.shape[0]}</p></div>', unsafe_allow_html=True)
+        st.metric("Total Responses", len(filtered_df))
     with col2:
-        avg_score = filtered_df['Maturity_Score'].mean()
-        st.markdown(f'<div class="metric-card"><h3>Avg Maturity</h3><p class="big-font">{avg_score:.1f}/100</p></div>', unsafe_allow_html=True)
+        avg_score = filtered_df['Maturity_Score'].mean() if 'Maturity_Score' in filtered_df else 0
+        st.metric("Avg. Maturity Score", round(avg_score, 1))
     with col3:
-        leaders = filtered_df[filtered_df['Maturity_Category'] == 'Digital Leader'].shape[0]
-        st.markdown(f'<div class="metric-card"><h3>Digital Leaders</h3><p class="big-font">{leaders}</p></div>', unsafe_allow_html=True)
+        st.metric("Siloed Businesses", len(siloed_businesses))
     with col4:
-        laggards = filtered_df[filtered_df['Maturity_Category'] == 'Digital Laggard'].shape[0]
-        st.markdown(f'<div class="metric-card"><h3>Digital Laggards</h3><p class="big-font">{laggards}</p></div>', unsafe_allow_html=True)
+        pct_invest = round(len(desire_to_invest) / len(filtered_df) * 100) if len(filtered_df) > 0 else 0
+        st.metric("Planning AI Investment", f"{pct_invest}%")
     
     st.divider()
     
     # --- Main Dashboard Content ---
-    col_left, col_right = st.columns([1, 1])
-    
-    with col_left:
-        st.subheader("1. AI Readiness vs Reality Gap")
-        st.write("Businesses that want to invest in AI vs those actively using advanced functions.")
-        
-        fig_ai = px.bar(
-            x=["Want to Invest", "Advanced Usage", "The 'Gap'"],
-            y=[insights['ai_gap']['desire_to_invest'], insights['ai_gap']['actual_advanced_use'], insights['ai_gap']['gap']],
-            labels={'x': "Category", 'y': "Number of Businesses"},
-            color=["Want to Invest", "Advanced Usage", "The 'Gap'"],
-            color_discrete_sequence=['#3498db', '#2ecc71', '#e74c3c']
-        )
-        st.plotly_chart(fig_ai, use_container_width=True)
-    
-    with col_right:
-        st.subheader("2. Silo Effect: Impact on Data Quality")
-        st.write("Businesses using digital tools without proper integration suffer from inconsistent data.")
-        
-        fig_silo = px.pie(
-            values=[insights['silo_effect']['inconsistent_data'], insights['silo_effect']['siloed_businesses'] - insights['silo_effect']['inconsistent_data']],
-            names=['Inconsistent Data', 'Consistent Data'],
-            title="Data Quality among Siloed Businesses",
-            color_discrete_sequence=['#e74c3c', '#95a5a6']
-        )
-        st.plotly_chart(fig_silo, use_container_width=True)
-    
+    row1_col1, row1_col2 = st.columns(2)
+
+    with row1_col1:
+        st.subheader("1. Persona Demographics")
+        persona_counts = filtered_df['Persona'].value_counts().reset_index()
+        persona_counts.columns = ['Persona', 'Count']
+        fig_pie = px.pie(persona_counts, values='Count', names='Persona', 
+                         title='Distribution of Respondent Personas', hole=0.4,
+                         color_discrete_sequence=px.colors.qualitative.Pastel)
+        st.plotly_chart(fig_pie, use_container_width=True)
+
+    with row1_col2:
+        st.subheader("2. Correlation Matrix")
+        corr_cols = ['CRM_Score', 'Cloud_Score', 'AI_Score', 'Maturity_Score']
+        # Filter to only columns that exist
+        corr_cols = [c for c in corr_cols if c in filtered_df.columns]
+        if len(corr_cols) > 1:
+            corr_matrix = filtered_df[corr_cols].corr()
+            fig_corr = px.imshow(corr_matrix, text_auto=".2f", aspect="auto", 
+                                 color_continuous_scale='RdBu_r', zmin=-1, zmax=1,
+                                 title="AI Readiness vs Adv. CRM/Cloud")
+            st.plotly_chart(fig_corr, use_container_width=True)
+        else:
+            st.write("Insufficient data columns for Correlation Matrix.")
+
     st.divider()
-    
-    col_bottom1, col_bottom2 = st.columns([1, 1])
-    
-    with col_bottom1:
-        st.subheader("3. Maturity Distribution by Persona")
-        fig_box = px.box(filtered_df, x="Persona", y="Maturity_Score", color="Persona", title="Spread of Digital Maturity (0-100)")
-        st.plotly_chart(fig_box, use_container_width=True)
-    
-    with col_bottom2:
-        st.subheader("4. Maturity Categories Breakdown")
-        category_counts = filtered_df['Maturity_Category'].value_counts().reset_index()
-        category_counts.columns = ['Category', 'Count']
-        fig_cat = px.bar(category_counts, x='Count', y='Category', orientation='h', color='Category', title="Count of Businesses by Maturity Segment")
-        st.plotly_chart(fig_cat, use_container_width=True)
+
+    row2_col1, row2_col2 = st.columns(2)
+
+    with row2_col1:
+        st.subheader("3. Manufacturing Analytics Funnel")
+        manufacturing_df = filtered_df[filtered_df['Industry'] == 'Manufacturing']
+        if not manufacturing_df.empty and 'Q9_Historical_Data' in manufacturing_df.columns and 'Q11_Manufacturing_Automated' in manufacturing_df.columns:
+            m_total = len(manufacturing_df)
+            collect_data = len(manufacturing_df[manufacturing_df['Q9_Historical_Data'] == 'Yes'])
+            automated = len(manufacturing_df[manufacturing_df['Q11_Manufacturing_Automated'] == 'Yes'])
+            predictive_ai = len(manufacturing_df[manufacturing_df.get('AI_Score', 0) >= 3])
+            
+            fig_funnel = go.Figure(go.Funnel(
+                y=['Total Manufacturing', 'Collects Historical Data', 'Automated Core Ops', 'Uses Predictive AI'],
+                x=[m_total, collect_data, automated, predictive_ai],
+                textinfo="value+percent initial",
+                marker={"color": ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]}
+            ))
+            fig_funnel.update_layout(title="Data Collection to Predictive Analytics")
+            st.plotly_chart(fig_funnel, use_container_width=True)
+        else:
+            st.write("Manufacturing data not available for funnel.")
+
+    with row2_col2:
+        st.subheader("4. Barriers to AI Adoption")
+        if 'AI_Score' in filtered_df.columns:
+            non_ai_users = filtered_df[filtered_df['AI_Score'] < 3].copy()
+            
+            def assign_barrier(row):
+                if row.get('Persona') == 'Traditionalist':
+                    return random.choice(['Lack of awareness/skills', 'High Cost', 'Data Privacy Concerns'])
+                elif row.get('Persona') == 'Transitioning MSME':
+                    return random.choice(['Integration with complex legacy systems', 'Lack of awareness/skills', 'Unclear ROI'])
+                else:
+                    return random.choice(['Security/Privacy Risks', 'Unclear ROI', 'Vendor lock-in'])
+                    
+            if not non_ai_users.empty:
+                non_ai_users['AI_Barrier'] = non_ai_users.apply(assign_barrier, axis=1)
+                
+                barrier_counts = non_ai_users.groupby(['AI_Barrier', 'Persona']).size().reset_index(name='Count')
+                fig_barriers = px.bar(barrier_counts, x='AI_Barrier', y='Count', color='Persona', 
+                                      barmode='group', title="Cited Barriers (Non-Advanced Users)")
+                fig_barriers.update_layout(xaxis_title="Cited Barrier", yaxis_title="Number of Businesses")
+                st.plotly_chart(fig_barriers, use_container_width=True)
+            else:
+                st.write("No non-AI users found to display barriers.")
+        else:
+            st.write("AI Score data missing.")
+
+    st.divider()
+
+    # Raw Data Table
+    st.subheader("Raw Data Viewer")
+    st.markdown("Explore and view the raw records powering this dashboard.")
+    st.dataframe(filtered_df, use_container_width=True)
