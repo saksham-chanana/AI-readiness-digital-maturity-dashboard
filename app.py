@@ -172,7 +172,7 @@ elif view == "Analytics Dashboard":
             'We use AI in a few specific or pilot use cases': 2.0,
             'AI is central to our core decision-making': 3.0,
             'Yes, AI is actively used across multiple business functions': 4.0
-        }).fillna(0.0)
+        }).fillna(0.0).astype(float)
         
     if 'Q2_Communication' in df.columns:
         df['CRM_Score'] = df['Q2_Communication'].map({
@@ -180,7 +180,7 @@ elif view == "Analytics Dashboard":
             'Messaging Tools (SMS/Email/WhatsApp/Social Media)': 1.0,
             'Basic Customer Software (Standard or Custom made)': 2.0,
             'Advanced Digital Software / CRM Software': 3.0
-        }).fillna(0.0)
+        }).fillna(0.0).astype(float)
         
     if 'Q6.2_Cloud_Deployment' in df.columns:
         df['Cloud_Score'] = df['Q6.2_Cloud_Deployment'].map({
@@ -188,7 +188,10 @@ elif view == "Analytics Dashboard":
             'Partly On-Premises /Cloud Based': 1.0,
             'Fully managed by software vendors/service providers': 2.0,
             'Cloud based Software systems': 3.0
-        }).fillna(0.0)
+        }).fillna(0.0).astype(float)
+        
+    if 'Maturity_Score' in df.columns:
+        df['Maturity_Score'] = df['Maturity_Score'].astype(float)
     
     # Export Button Logic
 
@@ -242,6 +245,7 @@ elif view == "Analytics Dashboard":
         fig_pie = px.pie(persona_counts, values='Count', names='Persona', 
                          title='Distribution of Respondent Personas', hole=0.4,
                          color_discrete_sequence=px.colors.qualitative.Pastel)
+        fig_pie.update_traces(textinfo='value+percent')
         st.plotly_chart(fig_pie, use_container_width=True)
 
     with row1_col2:
@@ -254,18 +258,9 @@ elif view == "Analytics Dashboard":
             # Calculate correlation matrix
             corr_matrix = filtered_df[corr_cols].corr()
             
-            # Create a heatmap using graph_objects for maximum reliability
-            fig_corr = go.Figure(data=go.Heatmap(
-                z=corr_matrix.values,
-                x=corr_matrix.columns,
-                y=corr_matrix.columns,
-                colorscale='RdBu_r',
-                zmin=-1, zmax=1,
-                text=corr_matrix.values.round(2),
-                texttemplate="%{text}",
-                showscale=True
-            ))
-            fig_corr.update_layout(title="AI Readiness vs Adv. CRM/Cloud")
+            fig_corr = px.imshow(corr_matrix, text_auto=".2f", aspect="auto", 
+                                 color_continuous_scale='RdBu_r', zmin=-1, zmax=1,
+                                 title="AI Readiness vs Adv. CRM/Cloud")
             st.plotly_chart(fig_corr, use_container_width=True)
         else:
             st.write("Insufficient numeric data columns for Correlation Matrix.")
@@ -298,6 +293,9 @@ elif view == "Analytics Dashboard":
         st.subheader("4. Barriers to AI Adoption")
         if 'AI_Score' in filtered_df.columns:
             non_ai_users = filtered_df[filtered_df['AI_Score'] < 3].copy()
+            
+            # Set fixed seed to prevent chart from jumping dynamically on every UI redraw
+            random.seed(42)
             
             def assign_barrier(row):
                 if row.get('Persona') == 'Traditionalist':
