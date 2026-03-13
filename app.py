@@ -162,16 +162,6 @@ elif view == "Analytics Dashboard":
             
     st.info(f"Currently viewing: **{data_mode}**")
     
-    # Export Button Logic
-    csv_buffer = io.StringIO()
-    df.to_csv(csv_buffer, index=False)
-    st.sidebar.download_button(
-        label="📥 Download Processed Dataset",
-        data=csv_buffer.getvalue(),
-        file_name="processed_dataset.csv",
-        mime="text/csv",
-    )
-
     # Basic Data Pre-processing for Charts (same logic as old app.py)
     # Ensure columns exist, are mapped correctly to numbers, and cast to float
     
@@ -199,6 +189,8 @@ elif view == "Analytics Dashboard":
             'Fully managed by software vendors/service providers': 2.0,
             'Cloud based Software systems': 3.0
         }).fillna(0.0)
+    
+    # Export Button Logic
 
     # Ensure Persona and Industry exist for filtering
     if 'Persona' not in df.columns:
