@@ -105,10 +105,10 @@ selected = option_menu(
     default_index=0,
     orientation="horizontal",
     styles={
-        "container": {"padding": "0!important", "background-color": "#ffffff", "border-radius": "10px", "box-shadow": "0 4px 6px rgba(0, 0, 0, 0.05)", "margin-bottom": "20px", "border": "1px solid #e2e8f0"},
-        "icon": {"color": "#4ade80", "font-size": "20px"},
-        "nav-link": {"font-size": "16px", "text-align": "center", "margin": "0px", "--hover-color": "#f0f2f6", "font-weight": "600"},
-        "nav-link-selected": {"background-color": "#1e3c72", "color": "white", "border-radius": "8px"},
+        "container": {"padding": "0!important", "background-color": "rgba(15,15,30,0.8)", "border-radius": "16px", "box-shadow": "0 0 30px rgba(138,43,226,0.2)", "margin-bottom": "20px", "border": "1px solid rgba(0,255,255,0.3)"},
+        "icon": {"color": "#00ffff", "font-size": "20px"},
+        "nav-link": {"color": "#e0e0e0", "font-size": "16px", "text-align": "center", "margin": "0px", "--hover-color": "rgba(138,43,226,0.4)", "font-weight": "600"},
+        "nav-link-selected": {"background": "linear-gradient(90deg, #8a2be2, #00ffff)", "color": "white", "border-radius": "12px"},
     }
 )
 view = selected
@@ -313,8 +313,9 @@ elif view == "Analytics Dashboard":
         persona_counts.columns = ['Persona', 'Count']
         fig_pie = px.pie(persona_counts, values='Count', names='Persona', 
                          title='Distribution of Respondent Personas', hole=0.4,
-                         color_discrete_sequence=px.colors.qualitative.Pastel)
-        fig_pie.update_traces(textinfo='value+percent')
+                         color_discrete_sequence=['#00ffff', '#8a2be2', '#ff00ff', '#1e90ff', '#ff1493'])
+        fig_pie.update_traces(textinfo='value+percent', marker=dict(line=dict(color='#050510', width=2)))
+        fig_pie.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#e0e0e0'))
         st.plotly_chart(fig_pie, use_container_width=True)
 
     with row1_col2:
@@ -328,8 +329,9 @@ elif view == "Analytics Dashboard":
             corr_matrix = filtered_df[corr_cols].corr()
             
             fig_corr = px.imshow(corr_matrix, text_auto=".2f", aspect="auto", 
-                                 color_continuous_scale='RdBu_r', zmin=-1, zmax=1,
+                                 color_continuous_scale=['#8a2be2', '#050510', '#00ffff'], zmin=-1, zmax=1,
                                  title="AI Readiness vs Adv. CRM/Cloud")
+            fig_corr.update_layout(template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#e0e0e0'))
             st.plotly_chart(fig_corr, use_container_width=True)
         else:
             st.write("Insufficient numeric data columns for Correlation Matrix.")
@@ -351,9 +353,9 @@ elif view == "Analytics Dashboard":
                 y=['Total Manufacturing', 'Collects Historical Data', 'Automated Core Ops', 'Uses Predictive AI'],
                 x=[m_total, collect_data, automated, predictive_ai],
                 textinfo="value+percent initial",
-                marker={"color": ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728"]}
+                marker={"color": ["#8a2be2", "#ff00ff", "#1e90ff", "#00ffff"]}
             ))
-            fig_funnel.update_layout(title="Data Collection to Predictive Analytics")
+            fig_funnel.update_layout(title="Data Collection to Predictive Analytics", template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#e0e0e0'))
             st.plotly_chart(fig_funnel, use_container_width=True)
         else:
             st.write("Manufacturing data not available for funnel.")
@@ -380,8 +382,8 @@ elif view == "Analytics Dashboard":
                 barrier_counts = non_ai_users.groupby(['AI_Barrier', 'Persona']).size().reset_index(name='Count')
                 fig_barriers = px.bar(barrier_counts, x='AI_Barrier', y='Count', color='Persona', 
                                       barmode='group', title="Cited Barriers (Non-Advanced Users)",
-                                      text_auto='.0f')
-                fig_barriers.update_layout(xaxis_title="Cited Barrier", yaxis_title="Number of Businesses")
+                                      text_auto='.0f', color_discrete_sequence=['#00ffff', '#8a2be2', '#ff00ff', '#1e90ff'])
+                fig_barriers.update_layout(xaxis_title="Cited Barrier", yaxis_title="Number of Businesses", template='plotly_dark', paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#e0e0e0'))
                 st.plotly_chart(fig_barriers, use_container_width=True)
             else:
                 st.write("No non-AI users found to display barriers.")
